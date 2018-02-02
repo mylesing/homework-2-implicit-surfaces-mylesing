@@ -24,6 +24,14 @@ class ShaderProgram {
   attrPos: number;
 
   unifView: WebGLUniformLocation;
+  unifResolution: WebGLUniformLocation;
+  unifCameraPos: WebGLUniformLocation;
+  // Camera
+  unifModel: WebGLUniformLocation;
+  unifModelInvTr: WebGLUniformLocation;
+  unifViewMtx: WebGLUniformLocation;
+  unifProjMtx: WebGLUniformLocation;
+  unifTime: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -41,7 +49,15 @@ class ShaderProgram {
 
     // TODO: add other attributes here
     this.unifView   = gl.getUniformLocation(this.prog, "u_View");
-  }
+    this.unifResolution = gl.getUniformLocation(this.prog, "u_Resolution");
+    this.unifCameraPos = gl.getUniformLocation(this.prog, "u_CameraPos");
+    this.unifTime = gl.getUniformLocation(this.prog, "u_Time");
+
+    // Camera
+    this.unifModel      = gl.getUniformLocation(this.prog, "u_Model");
+    this.unifModelInvTr = gl.getUniformLocation(this.prog, "u_ModelInvTr");
+    this.unifViewMtx   = gl.getUniformLocation(this.prog, "u_ViewMatrix");
+    this.unifProjMtx   = gl.getUniformLocation(this.prog, "u_ProjMatrix");  }
 
   use() {
     if (activeProgram !== this.prog) {
@@ -51,6 +67,60 @@ class ShaderProgram {
   }
 
   // TODO: add functions to modify uniforms
+setModelMatrix(model: mat4) {
+    this.use();
+    if (this.unifModel !== -1) {
+      gl.uniformMatrix4fv(this.unifModel, false, model);
+    }
+
+    if (this.unifModelInvTr !== -1) {
+      let modelinvtr: mat4 = mat4.create();
+      mat4.transpose(modelinvtr, model);
+      mat4.invert(modelinvtr, modelinvtr);
+      gl.uniformMatrix4fv(this.unifModelInvTr, false, modelinvtr);
+    }
+  }
+
+  setViewMatrix(vp: mat4) {
+    this.use();
+    if (this.unifViewMtx !== -1) {
+      gl.uniformMatrix4fv(this.unifViewMtx, false, vp);
+    }
+  }
+
+  setProjMatrix(vp: mat4) {
+    this.use();
+    if (this.unifProjMtx !== -1) {
+      gl.uniformMatrix4fv(this.unifProjMtx, false, vp);
+    }
+  }
+
+  // resolution; indices 2 and 3 are set to 0 and irrelevant
+setResoulution(res: vec4) {
+      this.use();
+
+      if(this.unifResolution != -1) {
+        gl.uniform4fv(this.unifResolution, res);
+      }
+  }
+
+  // resolution; indices 2 and 3 are set to 0 and irrelevant
+setCameraPos(camera: vec4) {
+  this.use();
+
+  if(this.unifCameraPos != -1) {
+    gl.uniform4fv(this.unifCameraPos, camera);
+  }
+}
+
+// set time for time affected visual changes
+setTime(t: number) {
+  this.use();
+
+  if(this.unifTime != -1) {
+      gl.uniform1f(this.unifTime, t);
+  }
+}
 
   draw(d: Drawable) {
     this.use();

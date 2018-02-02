@@ -1,4 +1,4 @@
-import {vec3} from 'gl-matrix';
+import {vec3, vec4, mat4} from 'gl-matrix';
 import * as Stats from 'stats-js';
 import * as DAT from 'dat-gui';
 import Square from './geometry/Square';
@@ -13,6 +13,8 @@ const controls = {
 };
 
 let screenQuad: Square;
+let time: number;
+time = 0;
 
 function main() {
   // Initial display for framerate
@@ -68,7 +70,23 @@ function main() {
     // TODO: send uniforms to shader
 
     // March!
-    raymarchShader.draw(screenQuad);
+    raymarchShader.setResoulution(vec4.fromValues(window.innerWidth, window.innerHeight, 0, 0));
+
+    let model = mat4.create();
+    let viewProj = mat4.create();
+
+    let invView = mat4.create();
+    let invProj = mat4.create();
+    mat4.identity(model);
+    mat4.multiply(viewProj, camera.projectionMatrix, camera.viewMatrix);
+    let cameraPos = vec4.fromValues(camera.position[0], camera.position[1], camera.position[2], 1.0);
+    raymarchShader.setCameraPos(cameraPos);
+    raymarchShader.setModelMatrix(model);
+    raymarchShader.setViewMatrix(camera.viewMatrix);
+    raymarchShader.setProjMatrix(camera.projectionMatrix);
+    // set time
+    raymarchShader.setTime(time++);
+    raymarchShader.draw(screenQuad);  
 
     // TODO: more shaders to layer / process the first one? (either via framebuffers or blending)
 
