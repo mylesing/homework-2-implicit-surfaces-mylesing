@@ -19,7 +19,7 @@ float sceneSDF(vec3 samplePoint);
 const int MAX_MARCHING_STEPS = 255;
 const float MIN_DIST = 0.0;
 const float MAX_DIST = 100.0;
-const float EPSILON = 0.01;
+const float EPSILON = 0.001;
 
 /////// PHONG SHADER //////
 // estimate normal using SDF gradient
